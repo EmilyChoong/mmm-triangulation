@@ -91,6 +91,20 @@ Full column-by-column details: `01_schema_observed.md` and `02_schema_truth.md`.
 | **Geo experiment** | switch Meta up in some regions, keep others normal, compare their sales | accurate, but only tests one channel at a time, and TV can't be tested this way |
 | **MMM** (Marketing Mix Model) | a statistical model that explains total sales over time using each channel's spend | can be fooled by the busy-season effect and channels moving together |
 
+**Attribution rules:** when a customer saw several ads before buying, a rule decides which channel gets the credit:
+
+| Rule | Who gets credit for the sale |
+|---|---|
+| Last click | the last ad clicked before buying |
+| First click | the first ad clicked |
+| Linear | split equally across every ad clicked |
+| Time decay | split, with more credit to ads closer to the purchase |
+| Position-based (U-shaped) | most credit to first and last (e.g. 40/40), the rest split across the middle |
+| Data-driven | a model learns the split from customer journeys |
+
+- **What they all share:** they only **share out** the credit for sales that happened. None of them asks whether the sale would have happened **without** the ad, so none measures incrementality.
+- **Attribution window:** how long after a click or view a sale can still be credited (e.g. 7-day click, 1-day view). Changing it changes the reported numbers overnight (planted for Meta later).
+
 - **Calibration:** use the geo experiment's result to correct the MMM.
 - **Triangulation:** put all three side by side against the truth and explain each gap.
 
