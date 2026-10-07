@@ -222,3 +222,27 @@ channels:
       target_iroas: 0.3
       saturation_half_spend_pct: 0.5
       hill_shape: 1.0
+
+# -----------------------------------------------------------------------------
+# Planted data issues (notebook 03). Applied to observed.duckdb ONLY.
+# The clean versions stay in truth.duckdb; every issue is logged in
+# truth.issue_register so the data-quality checks can be scored later.
+# -----------------------------------------------------------------------------
+data_issues:
+  tiktok_tracking_gap:          # TikTok API export broke: rows simply missing
+    channel: tiktok
+    start: "2024-08-12"
+    end: "2024-08-25"
+  region_code_rename:           # CRM migration: sales system uses a new code
+    old_code: R06               # Manchester
+    new_code: MCR01
+    from: "2025-04-01"
+  duplicate_load:               # ad-platform export loaded twice
+    table: media_daily
+    dates: ["2024-10-07", "2024-10-08", "2024-10-09"]
+  negative_spend:               # platform credit booked as negative spend
+    channel: google_nonbrand
+    date: "2025-01-20"
+    n_regions: 3
+  late_arriving_sales:          # data pulled before the last days fully landed
+    completeness: {"2025-12-29": 0.85, "2025-12-30": 0.60, "2025-12-31": 0.30}
