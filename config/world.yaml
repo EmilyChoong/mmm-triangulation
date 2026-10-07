@@ -1,0 +1,224 @@
+# =============================================================================
+# World config: a fictional UK ecommerce brand
+# Everything in here is GROUND TRUTH. Models must never read this file.
+# =============================================================================
+
+seed: 20261003
+
+dates:
+  start: "2024-01-01"
+  end: "2025-12-31"
+
+# Reserved for Phase 2. The business-as-usual world is simulated for this window
+# too (it becomes the true counterfactual). Design the test using ONLY data
+# before geo_test_window.start.
+geo_test_window:
+  start: "2025-09-08"
+  end: "2025-10-19"
+
+# -----------------------------------------------------------------------------
+# Regions (populations in thousands, approximate)
+# -----------------------------------------------------------------------------
+regions:
+  - {name: London,          nation: England,  pop_k: 8900}
+  - {name: Birmingham,      nation: England,  pop_k: 1140}
+  - {name: Leeds,           nation: England,  pop_k: 810}
+  - {name: Glasgow,         nation: Scotland, pop_k: 630}
+  - {name: Sheffield,       nation: England,  pop_k: 560}
+  - {name: Manchester,      nation: England,  pop_k: 550}
+  - {name: Bradford,        nation: England,  pop_k: 545}
+  - {name: Edinburgh,       nation: Scotland, pop_k: 520}
+  - {name: Liverpool,       nation: England,  pop_k: 490}
+  - {name: Bristol,         nation: England,  pop_k: 470}
+  - {name: Cardiff,         nation: Wales,    pop_k: 370}
+  - {name: Leicester,       nation: England,  pop_k: 370}
+  - {name: Coventry,        nation: England,  pop_k: 345}
+  - {name: Belfast,         nation: Northern Ireland, pop_k: 345}
+  - {name: Nottingham,      nation: England,  pop_k: 320}
+  - {name: Newcastle,       nation: England,  pop_k: 300}
+  - {name: Milton Keynes,   nation: England,  pop_k: 290}
+  - {name: Brighton,        nation: England,  pop_k: 280}
+  - {name: Sunderland,      nation: England,  pop_k: 275}
+  - {name: Hull,            nation: England,  pop_k: 270}
+  - {name: Plymouth,        nation: England,  pop_k: 265}
+  - {name: Wolverhampton,   nation: England,  pop_k: 265}
+  - {name: Derby,           nation: England,  pop_k: 260}
+  - {name: Stoke-on-Trent,  nation: England,  pop_k: 260}
+  - {name: Southampton,     nation: England,  pop_k: 250}
+  - {name: Swansea,         nation: Wales,    pop_k: 240}
+  - {name: Aberdeen,        nation: Scotland, pop_k: 225}
+  - {name: Peterborough,    nation: England,  pop_k: 215}
+  - {name: Portsmouth,      nation: England,  pop_k: 210}
+  - {name: York,            nation: England,  pop_k: 200}
+  - {name: Bournemouth,     nation: England,  pop_k: 200}
+  - {name: Reading,         nation: England,  pop_k: 175}
+  - {name: Oxford,          nation: England,  pop_k: 160}
+  - {name: Dundee,          nation: Scotland, pop_k: 150}
+  - {name: Preston,         nation: England,  pop_k: 150}
+  - {name: Norwich,         nation: England,  pop_k: 145}
+  - {name: Cambridge,       nation: England,  pop_k: 145}
+  - {name: Middlesbrough,   nation: England,  pop_k: 145}
+  - {name: Exeter,          nation: England,  pop_k: 130}
+  - {name: Inverness,       nation: Scotland, pop_k: 50}
+
+# How much regions differ from each other (all lognormal sigmas unless stated)
+region_heterogeneity:
+  baseline_per_capita_sd: 0.25   # some regions buy more per head
+  growth_mean: 0.06              # national yearly organic growth
+  growth_sd: 0.04                # regional deviation in growth
+  media_response_sd: 0.20        # some regions respond more to ads (MMM won't know)
+  allocation_sd: 0.15            # media buyers deviate from population share
+  cpm_sd: 0.10                   # some regions are pricier to reach (London)
+  tv_reach_sd: 0.10              # TV impressions don't split exactly by population
+
+# -----------------------------------------------------------------------------
+# Demand (multiplicative index around 1.0). The sales layer uses this as truth.
+# -----------------------------------------------------------------------------
+demand:
+  weekly: [1.04, 1.00, 0.98, 0.97, 0.96, 0.99, 1.06]   # Mon..Sun
+  yearly:
+    - {amplitude: 0.12, peak_day_of_year: 345}   # winter peak
+    - {amplitude: 0.04, peak_day_of_year: 190, harmonic: 2}   # smaller summer bump
+  bank_holiday_mult: 0.92
+  events:
+    black_friday:          # offsets relative to Black Friday
+      dates: ["2024-11-29", "2025-11-28"]
+      multipliers: {-3: 1.10, -2: 1.12, -1: 1.15, 0: 1.90, 1: 1.45, 2: 1.30, 3: 1.60}
+    christmas:
+      multipliers: {"12-23": 1.05, "12-24": 0.75, "12-25": 0.35, "12-26": 0.90, "01-01": 0.70}
+  bank_holidays: ["2024-01-01", "2024-03-29", "2024-04-01", "2024-05-06", "2024-05-27",
+                  "2024-08-26", "2024-12-25", "2024-12-26",
+                  "2025-01-01", "2025-04-18", "2025-04-21", "2025-05-05", "2025-05-26",
+                  "2025-08-25", "2025-12-25", "2025-12-26"]
+
+# -----------------------------------------------------------------------------
+# Promotions. `true_lift` is truth only; the observed table gets dates + discount.
+# -----------------------------------------------------------------------------
+promotions:
+  - {name: spring_sale_2024,  start: "2024-03-15", end: "2024-03-24", discount: 0.15, true_lift: 0.18, nations: all}
+  - {name: summer_sale_2024,  start: "2024-07-05", end: "2024-07-21", discount: 0.20, true_lift: 0.22, nations: all}
+  - {name: bf_sale_2024,      start: "2024-11-25", end: "2024-12-02", discount: 0.25, true_lift: 0.30, nations: all}
+  - {name: boxing_day_2024,   start: "2024-12-26", end: "2025-01-05", discount: 0.30, true_lift: 0.25, nations: all}
+  - {name: spring_sale_2025,  start: "2025-03-14", end: "2025-03-23", discount: 0.15, true_lift: 0.18, nations: all}
+  - {name: scotland_pop_up,   start: "2025-06-06", end: "2025-06-15", discount: 0.20, true_lift: 0.25, nations: [Scotland]}
+  - {name: summer_sale_2025,  start: "2025-07-04", end: "2025-07-20", discount: 0.20, true_lift: 0.22, nations: all}
+  - {name: bf_sale_2025,      start: "2025-11-24", end: "2025-12-01", discount: 0.25, true_lift: 0.30, nations: all}
+  - {name: boxing_day_2025,   start: "2025-12-26", end: "2025-12-31", discount: 0.30, true_lift: 0.25, nations: all}
+
+# -----------------------------------------------------------------------------
+# Budgets: how the (fictional) media planner behaves
+# -----------------------------------------------------------------------------
+budget_planning:
+  yearly_growth: 0.10            # 2025 budgets are 10% higher than 2024
+  monthly_shift_sd: 0.15         # month-to-month campaign changes (gives MMM variation)
+  daily_ar_phi: 0.85             # day-to-day pacing noise is autocorrelated
+  daily_ar_sd: 0.07
+  regional_daily_noise_sd: 0.05
+  cpm_demand_elasticity: 0.5     # auctions get pricier when demand is high (Q4)
+  # Planted design problem: TikTok budget copies Meta for a few months
+  # (collinearity the MMM will struggle with)
+  collinear_window:
+    follower: tiktok
+    leader: meta
+    start: "2025-02-01"
+    end: "2025-05-31"
+    noise_sd: 0.03
+
+# -----------------------------------------------------------------------------
+# Sales layer (truth)
+# -----------------------------------------------------------------------------
+sales:
+  baseline_annual_revenue_gbp: 60000000   # organic revenue in 2024 with zero media
+  aov_gbp: 55                    # average order value
+  aov_daily_sd: 0.03
+  promo_aov_pass_through: 0.5    # AOV falls by discount x this during promotions
+  basket_noise_sd: 0.02          # revenue noise on top of order counts
+  nb_alpha: 40                   # order overdispersion (higher = less noisy)
+  adstock_l_max: {geometric: 21, delayed: 42}
+  brand_search:
+    searches_per_organic_order: 1.5    # people who'd buy anyway still Google the brand
+    searches_per_media_order: 3.0      # ad-driven buyers search the brand even more (mediator)
+    ad_impression_share: 0.90
+    cpc_daily_sd: 0.05
+
+# -----------------------------------------------------------------------------
+# Channels
+#   planning:  what the observed business does (budgets, CPM, CTR)
+#   truth:     how ads actually work - used by the sales layer (next step)
+# -----------------------------------------------------------------------------
+channels:
+  meta:
+    label: Meta
+    geo_targetable: true
+    annual_budget_gbp: 3000000
+    demand_elasticity: 1.5         # planner scales budget with forecast demand -> confounding
+    cpm_gbp: 6.0
+    ctr: 0.009
+    truth:
+      adstock: geometric
+      half_life_days: 4
+      target_iroas: 2.0            # avg incremental revenue per £ over the 2 years
+      saturation_half_spend_pct: 1.2   # half-saturation point as multiple of avg daily spend
+      hill_shape: 1.0
+  google_nonbrand:
+    label: Google non-brand search
+    geo_targetable: true
+    annual_budget_gbp: 1500000
+    demand_elasticity: 1.8
+    cpm_gbp: 22.0
+    ctr: 0.04
+    truth:
+      adstock: geometric
+      half_life_days: 1
+      target_iroas: 1.5
+      saturation_half_spend_pct: 0.6   # saturates early
+      hill_shape: 1.0
+  tiktok:
+    label: TikTok
+    geo_targetable: true
+    annual_budget_gbp: 1200000
+    demand_elasticity: 1.0
+    cpm_gbp: 4.0
+    ctr: 0.006
+    truth:
+      adstock: geometric
+      half_life_days: 3
+      target_iroas: 1.0
+      saturation_half_spend_pct: 1.0
+      hill_shape: 1.2
+  youtube_tv:
+    label: YouTube / TV
+    geo_targetable: false          # bought nationally -> only national spend observed
+    annual_budget_gbp: 2000000
+    demand_elasticity: 0.5
+    cpm_gbp: 9.0
+    ctr: null                      # no clicks
+    flighting:                     # bursts; zero spend outside these
+      - ["2024-02-05", "2024-03-03"]
+      - ["2024-05-13", "2024-06-09"]
+      - ["2024-09-09", "2024-10-06"]
+      - ["2024-11-11", "2024-12-22"]
+      - ["2025-02-03", "2025-03-02"]
+      - ["2025-05-12", "2025-06-08"]
+      - ["2025-09-22", "2025-10-19"]   # overlaps the geo test on purpose
+      - ["2025-11-10", "2025-12-21"]
+    truth:
+      adstock: delayed             # effect builds then decays (MMM will assume geometric)
+      half_life_days: 14
+      peak_delay_days: 5
+      target_iroas: 1.2
+      saturation_half_spend_pct: 1.5
+      hill_shape: 2.0               # >1 = S-curve: needs a minimum weight before it works
+  brand_search:
+    label: Google brand search
+    geo_targetable: true
+    annual_budget_gbp: 400000
+    cpm_gbp: 30.0
+    ctr: 0.30
+    generated_in: sales_layer      # queries depend on other media, so built in step 2
+    truth:
+      adstock: geometric
+      half_life_days: 0.5
+      target_iroas: 0.3
+      saturation_half_spend_pct: 0.5
+      hill_shape: 1.0

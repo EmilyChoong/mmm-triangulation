@@ -1,0 +1,10 @@
+numpy
+pandas
+duckdb
+pyyaml
+pymc
+matplotlib
+jupyter
+pymc-marketing
+causalpy
+graphviz
